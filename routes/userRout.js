@@ -17,7 +17,7 @@ const db = mysql.createPool({
 
 mysql.createConnection;
 
-router.get("/", (req, res) => {
+router.get("/", checkToken, (req, res) => {
 	const getUsersQuery = `select * from user`;
 	db.query(getUsersQuery, (error, result) => {
 		if (error) {
@@ -32,7 +32,18 @@ router.get("/", (req, res) => {
 
 router.post("/api/user/register", async (req, res) => {
 	// console.log(req.body);
-	const { firstName, email, password, confirmPassword } = req.body;
+	const {
+		firstName,
+		midName,
+		lastName,
+		email,
+		password,
+		confirmPassword,
+		userWork,
+
+		imageData,
+		userDescription,
+	} = req.body;
 	// console.log(firstName);
 	// console.log(email);
 	// console.log(password.length);
@@ -52,10 +63,28 @@ router.post("/api/user/register", async (req, res) => {
 		// console.log(hashedConfirmPassword);
 		// res.send("hashed");
 
-		const userPostQuery = `insert into user(firstName,email,password,confirmPassword,dateCreated) values(?,?,?,?,now())`;
+		const userPostQuery = `insert into user(firstName,
+			midName,
+			lastName,
+			email,
+			password,
+			confirmPassword,
+			userWork,
+			imageData,
+			userDescription) values(?,?,?,?,?,?,?,?,?)`;
 		db.query(
 			userPostQuery,
-			[firstName, email, hashedPassword, hashedConfirmPassword],
+			[
+				firstName,
+				midName,
+				lastName,
+				email,
+				hashedPassword,
+				hashedConfirmPassword,
+				userWork,
+				imageData,
+				userDescription,
+			],
 			(error, result) => {
 				// console.log(userPostQuery);
 				// console.log(error);
@@ -108,8 +137,17 @@ router.post("/api/user/login", (req, res) => {
 					res.cookie("userEmail", jasonToken, {
 						maxAge: 2 * 60 * 60 * 1000,
 						httpOnly: true,
+						secure: false,
 					});
-					res.send(jasonToken);
+					// res.header("userEmail", jasonToken);
+					// console.log(
+					// 	res.cookie("userEmail", jasonToken, {
+					// 		maxAge: 2 * 60 * 60 * 1000,
+					// 		httpOnly: false,
+					// 	})
+					// );
+					console.log("logged in");
+					res.status(200).send("Logged In");
 					// return jasonToken;
 				}
 				// res.send("error");
@@ -151,7 +189,6 @@ router.get("/api/post/getPostById/:userId", checkToken, (req, res) => {
 			console.log(error);
 			res.send("error");
 		} else {
-			// console.log(result);
 			res.send(result);
 		}
 	});

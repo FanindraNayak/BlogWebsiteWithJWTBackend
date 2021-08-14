@@ -2,10 +2,19 @@ const express = require("express");
 const app = express();
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
+const cors = require("cors");
 dotenv.config();
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(
+	cors({
+		origin: ["http://localhost:3000"],
+		methods: ["POST", "GET"],
+		credentials: true,
+	})
+);
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
 const userRoutes = require("./routes/userRout");
 
 const PORT = process.env.PORT || 3012;
