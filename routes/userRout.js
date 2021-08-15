@@ -157,19 +157,26 @@ router.post("/api/user/login", (req, res) => {
 	}
 });
 
-router.get("/api/user/getOneUser/:userId", checkToken, (req, res) => {
+router.get("/api/user/getOneUser/:email", checkToken, (req, res) => {
 	// console.log(req.params);
-	const userId = req.params.userId;
-	const getUserById = ` select * from user where userId = ?`;
-	db.query(getUserById, [userId], (error, result) => {
+	const email = req.params.email;
+	const getUserById = ` select * from user where email = ?`;
+	db.query(getUserById, [email], (error, result) => {
 		if (error) console.log(error);
+		console.log(result);
 		res.send(result[0]);
 	});
 });
 
+router.get("/api/user/getCurrentUser", checkToken, (req, res) => {
+	// console.log(res);
+	// console.log(req.emails);
+	res.send({ message: "present", email: req.emails });
+});
+
 router.get("/api/post/getAllPosts", checkToken, (req, res) => {
 	// console.log(req.body);
-	const getPostQuery = `select postId,userId,imageOfPost,title,postDescription,createdAt from posts `;
+	const getPostQuery = `select postId,userId,imageOfPost,title,postDescription,createdAt,userName from posts `;
 	db.query(getPostQuery, (error, result) => {
 		// console.log(result);
 		if (error) {
@@ -179,7 +186,7 @@ router.get("/api/post/getAllPosts", checkToken, (req, res) => {
 	});
 });
 
-router.get("/api/post/getPostById/:userId", checkToken, (req, res) => {
+router.get("/api/post/getPostByEmail/:userId", checkToken, (req, res) => {
 	const userId = req.params.userId;
 	// console.log(req.params);
 	// console.log(userId);

@@ -7,7 +7,9 @@ const checkToken = (req, res, next) => {
 	// let token = req.get("userEmail");
 	// we used cookie parser to get cookies see in server.js
 	let token = req.cookies.userEmail;
-	console.log(token);
+	// console.log(res);
+	// console.log(req);
+	// console.log(token);
 	if (token) {
 		// token = token.slice(7);
 		jwt.verify(token, "SecretePassword", (error, decoded) => {
@@ -15,12 +17,17 @@ const checkToken = (req, res, next) => {
 				console.log(error);
 				res.send("Invalid Token");
 			} else {
+				// res.send(decoded);
+				// seding data to the route using req metod and variable name you wwant
+				req.emails = decoded.userEmail;
+				// console.log(decoded.userEmail);
 				console.log("success");
 				next();
 			}
 		});
 	} else {
 		res.send("accessDenied");
+		// console.log(token);
 		// next();
 	}
 };
