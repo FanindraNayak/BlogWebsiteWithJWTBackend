@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 dotenv.config();
 
-app.use(express.json());
+app.use(express.json({ limit: "10000kb", extended: true }));
 app.use(
 	cors({
 		origin: ["http://localhost:3000"],
@@ -14,7 +14,7 @@ app.use(
 	})
 );
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ limit: "10000kb", extended: true }));
 const userRoutes = require("./routes/userRout");
 
 const PORT = process.env.PORT || 3012;

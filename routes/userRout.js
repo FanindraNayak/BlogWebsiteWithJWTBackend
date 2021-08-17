@@ -31,64 +31,47 @@ router.get("/", checkToken, (req, res) => {
 });
 
 router.post("/api/user/register", async (req, res) => {
-	// console.log(req.body);
 	const {
 		firstName,
-		midName,
 		lastName,
 		email,
 		password,
 		confirmPassword,
 		userWork,
-
 		imageData,
-		userDescription,
 	} = req.body;
-	// console.log(firstName);
-	// console.log(email);
-	// console.log(password.length);
-	// console.log(confirmPassword);
-	// console.log("hi");
 
 	if (!firstName || !email || !password || !confirmPassword) {
 		res.send("fill all entry");
 	} else if (password !== confirmPassword) {
-		res.send("passwords doesnot match");
+		res.send("passwords does not match");
 	} else if (password.length < 6 || confirmPassword.length < 6) {
 		res.send("passwords length is less then 6");
 	} else {
 		let hashedPassword = await bcrypt.hash(password, 10);
-		// console.log(hashedPassword);
 		let hashedConfirmPassword = await bcrypt.hash(confirmPassword, 10);
-		// console.log(hashedConfirmPassword);
-		// res.send("hashed");
 
 		const userPostQuery = `insert into user(firstName,
-			midName,
 			lastName,
 			email,
 			password,
 			confirmPassword,
 			userWork,
 			imageData,
-			userDescription) values(?,?,?,?,?,?,?,?,?)`;
+			dateCreated
+			) values(?,?,?,?,?,?,?,now())`;
 		db.query(
 			userPostQuery,
 			[
 				firstName,
-				midName,
 				lastName,
 				email,
 				hashedPassword,
 				hashedConfirmPassword,
 				userWork,
 				imageData,
-				userDescription,
 			],
 			(error, result) => {
-				// console.log(userPostQuery);
-				// console.log(error);
-				// console.log(result);
 				if (error) {
 					console.log(error);
 					res.send("Error");
@@ -102,7 +85,6 @@ router.post("/api/user/register", async (req, res) => {
 });
 
 router.post("/api/user/login", (req, res) => {
-	// console.log(req.body);
 	const { email, password } = req.body;
 
 	if (!email || !password || password.length < 6) {
@@ -111,24 +93,16 @@ router.post("/api/user/login", (req, res) => {
 		const loginInUserQuery = `select email,password,confirmPassword from user where email = ?`;
 		db.query(loginInUserQuery, [email], async (error, result) => {
 			if (error) {
-				// console.log("error");
 				console.log(error);
 				res.send("Error");
 			} else if (result.length === 0) {
 				console.log("No such email exist");
 				res.send("no user");
 			} else {
-				// const { email, password, confirmPassword } = result[0];
-				// const emailFromDb = result[0].email;
 				const passwordFromDb = result[0].password;
-				// console.log(password);
-				// console.log(passwordFromDb, emailFromDb, confirmPasswordFromDb);
 				const comparedOne = await bcrypt.compare(password, passwordFromDb);
 
 				if (comparedOne === true) {
-					// console.log(comparedOne);
-					// console.log(compareConfirmPassword);
-					// passwordFromDb = undefined;
 					// getting jwt token
 					const jasonToken = jwt.sign({ userEmail: email }, "SecretePassword", {
 						expiresIn: "1hr",
@@ -139,46 +113,32 @@ router.post("/api/user/login", (req, res) => {
 						httpOnly: true,
 						secure: false,
 					});
-					// res.header("userEmail", jasonToken);
-					// console.log(
-					// 	res.cookie("userEmail", jasonToken, {
-					// 		maxAge: 2 * 60 * 60 * 1000,
-					// 		httpOnly: false,
-					// 	})
-					// );
 					console.log("logged in");
 					res.status(200).send("Logged In");
 					// return jasonToken;
 				}
-				// res.send("error");
-				// res.send(result);
 			}
 		});
 	}
 });
 
 router.get("/api/user/getOneUser/:email", checkToken, (req, res) => {
-	// console.log(req.params);
 	const email = req.params.email;
-	const getUserById = ` select * from user where email = ?`;
+	const getUserById = `select userId,firstName,lastName,email,dateCreated,userWork,imageData from user where email = ?`;
 	db.query(getUserById, [email], (error, result) => {
 		if (error) console.log(error);
-		console.log(result);
+		// console.log(result);
 		res.send(result[0]);
 	});
 });
 
 router.get("/api/user/getCurrentUser", checkToken, (req, res) => {
-	// console.log(res);
-	// console.log(req.emails);
 	res.send({ message: "present", email: req.emails });
 });
 
 router.get("/api/post/getAllPosts", checkToken, (req, res) => {
-	// console.log(req.body);
-	const getPostQuery = `select postId,userId,imageOfPost,title,postDescription,createdAt,userName from posts `;
+	const getPostQuery = `select postId,userId,imageOfPost,title,postDescription,createdAt from posts `;
 	db.query(getPostQuery, (error, result) => {
-		// console.log(result);
 		if (error) {
 			console.log(error);
 		}
@@ -186,10 +146,8 @@ router.get("/api/post/getAllPosts", checkToken, (req, res) => {
 	});
 });
 
-router.get("/api/post/getPostByEmail/:userId", checkToken, (req, res) => {
+router.get("/api/post/getPostByUserId/:userId", checkToken, (req, res) => {
 	const userId = req.params.userId;
-	// console.log(req.params);
-	// console.log(userId);
 	const getSingUserPosts = `select postId,userId,imageOfPost,title,postDescription,createdAt from posts where userId = ?`;
 	db.query(getSingUserPosts, [userId], (error, result) => {
 		if (error) {
@@ -200,10 +158,22 @@ router.get("/api/post/getPostByEmail/:userId", checkToken, (req, res) => {
 		}
 	});
 });
-
+router.get("/api/post/getOneSinglePost/:postId", checkToken, (req, res) => {
+	// console.log();
+	const postId = req.params.postId;
+	const getTheSinglePOstQuery = `select postId,userId,imageOfPost,title,postDescription,createdAt from posts where postId = ?`;
+	db.query(getTheSinglePOstQuery, [postId], (error, result) => {
+		if (error) console.log(error);
+		else {
+			// console.log(result);
+			res.send(result[0]);
+		}
+	});
+	// console.log(res);
+});
 router.post("/api/post/createPost", checkToken, (req, res) => {
-	// console.log(req.body);
 	const { userId, imageOfPost, title, postDescription } = req.body;
+	console.log(userId);
 	if (!userId || !title) {
 		res.send("Title is must");
 	} else {
@@ -216,7 +186,6 @@ router.post("/api/post/createPost", checkToken, (req, res) => {
 					console.log(error);
 					res.send("Error");
 				}
-				// console.log(result);
 				res.send("Post created");
 			}
 		);
