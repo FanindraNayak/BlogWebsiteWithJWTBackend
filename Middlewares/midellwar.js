@@ -10,7 +10,6 @@ const checkToken = (req, res, next) => {
 				console.log(error);
 				res.send("Invalid Token");
 			} else {
-				// res.send(decoded);
 				// sending data to the route using req method and variable name you wwant
 				req.emails = decoded.userEmail;
 				console.log("success");

@@ -127,13 +127,20 @@ router.get("/api/user/getOneUser/:email", checkToken, (req, res) => {
 	const getUserById = `select userId,firstName,lastName,email,dateCreated,userWork,imageData from user where email = ?`;
 	db.query(getUserById, [email], (error, result) => {
 		if (error) console.log(error);
-		// console.log(result);
 		res.send(result[0]);
 	});
 });
 
 router.get("/api/user/getCurrentUser", checkToken, (req, res) => {
 	res.send({ message: "present", email: req.emails });
+});
+
+// Logging Out User
+
+router.get("/api/user/logout", (req, res) => {
+	console.log(res.cookie());
+	res.clearCookie("userEmail");
+	return res.status(200).send("loggedOut");
 });
 
 router.get("/api/post/getAllPosts", checkToken, (req, res) => {
@@ -159,17 +166,14 @@ router.get("/api/post/getPostByUserId/:userId", checkToken, (req, res) => {
 	});
 });
 router.get("/api/post/getOneSinglePost/:postId", checkToken, (req, res) => {
-	// console.log();
 	const postId = req.params.postId;
 	const getTheSinglePOstQuery = `select postId,userId,imageOfPost,title,postDescription,createdAt from posts where postId = ?`;
 	db.query(getTheSinglePOstQuery, [postId], (error, result) => {
 		if (error) console.log(error);
 		else {
-			// console.log(result);
 			res.send(result[0]);
 		}
 	});
-	// console.log(res);
 });
 router.post("/api/post/createPost", checkToken, (req, res) => {
 	const { userId, imageOfPost, title, postDescription } = req.body;

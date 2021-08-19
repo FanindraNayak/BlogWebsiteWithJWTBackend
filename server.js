@@ -19,11 +19,6 @@ const userRoutes = require("./routes/userRout");
 
 const PORT = process.env.PORT || 3012;
 app.use("/", userRoutes);
-// app.post("/api/user", (req, res) => {
-// 	console.log(req.body);
-// 	console.log("hi");
-// 	res.send("user created");
-// });
 app.listen(PORT, () => {
-	console.log("listining on ", PORT);
+	console.log("listening on ", PORT);
 });
